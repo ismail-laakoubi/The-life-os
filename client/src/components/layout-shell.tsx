@@ -1,6 +1,7 @@
 import { cn } from "../lib/utils";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../hooks/use-theme";
+import { Timer } from "lucide-react";
 
 
 import { ReactNode } from "react";
@@ -26,6 +27,7 @@ import {
   Calendar,
   BookOpen,
   Clock,
+  
   XCircle,
   LogOut,
   User as UserIcon,
@@ -37,6 +39,7 @@ const navigation = [
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
   { name: "Habits", href: "/habits", icon: TrendingUp },
   { name: "Goals", href: "/goals", icon: Target },
+  { name: "Pomodoro", href: "/pomodoro", icon: Timer }, // ADD THIS LINE
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Wellness", href: "/wellness", icon: Heart },
   { name: "Nutrition", href: "/nutrition", icon: Utensils },

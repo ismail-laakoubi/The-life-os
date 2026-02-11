@@ -347,6 +347,31 @@ export async function registerRoutes(
     await storage.deleteHabitReduction(Number(req.params.id));
     res.sendStatus(204);
   });
+// ========== POMODORO ==========
+app.get("/api/pomodoro", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const sessions = await storage.getPomodoroSessions(req.user!.id);
+  res.json(sessions);
+});
 
+app.post("/api/pomodoro", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const session = await storage.createPomodoroSession(req.user!.id, req.body);
+    res.status(201).json(session);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/pomodoro/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const session = await storage.updatePomodoroSession(Number(req.params.id), req.body);
+    res.json(session);
+  } catch (error) {
+    next(error);
+  }
+});
   return httpServer;
 }

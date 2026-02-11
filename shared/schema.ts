@@ -138,6 +138,17 @@ export const habitReductionLogs = pgTable("habit_reduction_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const pomodoroSessions = pgTable("pomodoro_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // 'work' | 'short-break' | 'long-break'
+  duration: integer("duration").notNull(), // in minutes
+  completed: boolean("completed").notNull().default(false),
+  startedAt: timestamp("started_at").notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ===== RELATIONS =====
 export const usersRelations = relations(users, ({ many }) => ({
   tasks: many(tasks),
@@ -197,6 +208,9 @@ export const habitReductionLogsRelations = relations(habitReductionLogs, ({ one 
   tracker: one(habitReduction, { fields: [habitReductionLogs.trackerId], references: [habitReduction.id] }),
 }));
 
+export const pomodoroSessionsRelations = relations(pomodoroSessions, ({ one }) => ({
+  user: one(users, { fields: [pomodoroSessions.userId], references: [users.id] }),
+}));
 // ===== SCHEMAS =====
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true });
@@ -237,3 +251,6 @@ export type InsertReadingItem = z.infer<typeof insertReadingItemSchema>;
 export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
 export type InsertHabitReduction = z.infer<typeof insertHabitReductionSchema>;
 export type InsertHabitReductionLog = z.infer<typeof insertHabitReductionLogSchema>;
+export type PomodoroSession = typeof pomodoroSessions.$inferSelect;
+export const insertPomodoroSessionSchema = createInsertSchema(pomodoroSessions).omit({ id: true, createdAt: true });
+export type InsertPomodoroSession = z.infer<typeof insertPomodoroSessionSchema>;

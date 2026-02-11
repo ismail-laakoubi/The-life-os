@@ -1,3 +1,4 @@
+import PomodoroPage from "./pages/pomodoro-page";
 import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/tasks"><ProtectedRoute component={TasksPage} /></Route>
       <Route path="/habits"><ProtectedRoute component={HabitsPage} /></Route>
       <Route path="/goals"><ProtectedRoute component={GoalsPage} /></Route>
+      <Route path="/pomodoro"><ProtectedRoute component={PomodoroPage} /></Route>
       <Route path="/calendar"><ProtectedRoute component={CalendarPage} /></Route>
       <Route path="/wellness"><ProtectedRoute component={WellnessPage} /></Route>
       <Route path="/nutrition"><ProtectedRoute component={NutritionPage} /></Route>

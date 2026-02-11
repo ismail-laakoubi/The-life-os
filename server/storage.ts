@@ -3,6 +3,7 @@ import {
   users, tasks, habits, habitLogs, goals, financeEntries, 
   wellnessLogs, nutritionLogs, timelineEvents, habitReduction, habitReductionLogs,
   readingList,
+  pomodoroSessions, // ADD THIS LINE
   type User, type Task, type Habit, type HabitLog, type Goal, 
   type FinanceEntry, type WellnessLog, type NutritionLog,
   type TimelineEvent, type HabitReduction, type HabitReductionLog,
@@ -227,6 +228,21 @@ export async function deleteHabitReduction(id: number): Promise<void> {
   await db.delete(habitReductionLogs).where(eq(habitReductionLogs.trackerId, id));
   await db.delete(habitReduction).where(eq(habitReduction.id, id));
 }
+export async function getPomodoroSessions(userId: number) {
+  return db.select().from(pomodoroSessions)
+    .where(eq(pomodoroSessions.userId, userId))
+    .orderBy(desc(pomodoroSessions.startedAt));
+}
+
+export async function createPomodoroSession(userId: number, data: Partial<typeof pomodoroSessions.$inferInsert>) {
+  const [session] = await db.insert(pomodoroSessions).values({ ...data, userId }).returning();
+  return session;
+}
+
+export async function updatePomodoroSession(id: number, data: Partial<typeof pomodoroSessions.$inferInsert>) {
+  const [session] = await db.update(pomodoroSessions).set(data).where(eq(pomodoroSessions.id, id)).returning();
+  return session;
+}
 
 export const storage = {
   // Users
@@ -283,4 +299,8 @@ export const storage = {
   createHabitReduction,
   logHabitReduction,
   deleteHabitReduction,
+
+  getPomodoroSessions,
+  createPomodoroSession,
+  updatePomodoroSession,
 };
