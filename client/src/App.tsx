@@ -14,6 +14,7 @@ import RecoveryPage from "./pages/recovery-page";
 import NotFound from "./pages/not-found";
 import AuthPage from "./pages/auth-page";
 import Dashboard from "./pages/dashboard";
+import HomePage from "./pages/home-page";
 import TasksPage from "./pages/tasks-page";
 import HabitsPage from "./pages/habits-page";
 import GoalsPage from "./pages/goals-page";
@@ -47,11 +48,30 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   );
 }
 
+function PublicRoute({ component: Component }: { component: React.ComponentType }) {
+  const { data: user, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Redirect to="/dashboard" />;
+  }
+
+  return <Component />;
+}
+
 function Router() {
   return (
     <Switch>
+      <Route path="/"><PublicRoute component={HomePage} /></Route>
       <Route path="/auth" component={AuthPage} />
-      <Route path="/"><ProtectedRoute component={Dashboard} /></Route>
+      <Route path="/dashboard"><ProtectedRoute component={Dashboard} /></Route>
       <Route path="/tasks"><ProtectedRoute component={TasksPage} /></Route>
       <Route path="/habits"><ProtectedRoute component={HabitsPage} /></Route>
       <Route path="/goals"><ProtectedRoute component={GoalsPage} /></Route>

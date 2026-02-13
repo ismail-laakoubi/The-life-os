@@ -27,7 +27,7 @@ export function useLogin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setLocation("/");
+      setLocation("/dashboard");
     },
   });
 }
@@ -43,7 +43,7 @@ export function useRegister() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setLocation("/");
+      setLocation("/dashboard");
     },
   });
 }
