@@ -1,99 +1,103 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
+import { getQueryFn } from "../lib/queryClient";
 
-// --- تعريف أنواع البيانات (Types) ---
-export type RecoveryProfile = {
+type RecoveryProfile = {
   id: number;
   userId: number;
   addictionType: string;
   sobrietyStartDate: string;
   motivation?: string | null;
+  triggers?: string | null;
+  supportContacts?: string | null;
   dailyGoal?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 };
 
-export type CheckIn = {
+type RecoveryCheckIn = {
   id: number;
   profileId: number;
   date: string;
   isClean: boolean;
   mood: number;
   urgeIntensity?: number | null;
+  triggersEncountered?: string | null;
+  copingStrategiesUsed?: string | null;
   gratitude?: string | null;
   notes?: string | null;
+  createdAt?: string | null;
 };
 
-export type CopingStrategy = {
+type CopingStrategy = {
   id: number;
   profileId: number;
   title: string;
   description?: string | null;
-  category: string;
-  effectiveness: number;
+  category?: string | null;
+  effectiveness?: number | null;
   timesUsed: number;
+  createdAt?: string | null;
 };
 
-// --- دالة موحدة لمعالجة الأخطاء ---
-const handleMutationError = (error: Error, action: string) => {
-  console.error(`Error ${action}:`, error);
-  alert(`Failed to ${action}: ${error.message}`);
-};
-
-// --- Hooks for Recovery Profile ---
 export function useRecoveryProfile() {
-  return useQuery<RecoveryProfile | null>({
-    queryKey: ["recoveryProfile"],
-    queryFn: async () => {
-      try {
-        const res = await apiRequest("/api/recovery/profile", "GET");
-        return res.json();
-      } catch (error: any) {
-        if (error.message.includes("404")) {
-          return null;
-        }
-        throw error;
-      }
-    },
+  return useQuery({
+    queryKey: ["/api/recovery/profile"],
+    queryFn: getQueryFn<RecoveryProfile>({ on401: "returnNull" }),
   });
 }
 
 export function useCreateRecoveryProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<RecoveryProfile, 'id' | 'userId'>) => {
-      const res = await apiRequest("/api/recovery/profile", "POST", data);
+    mutationFn: async (data: Partial<RecoveryProfile>) => {
+      const res = await fetch("/api/recovery/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create profile");
+      }
+      
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recoveryProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/recovery/profile"] });
     },
-    onError: (error: Error) => handleMutationError(error, "create profile"),
   });
 }
 
 export function useUpdateRecoveryProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Partial<RecoveryProfile> & { id: number }) => {
-      const res = await apiRequest(`/api/recovery/profile/${data.id}`, "PATCH", data);
+    mutationFn: async ({ id, ...data }: Partial<RecoveryProfile> & { id: number }) => {
+      const res = await fetch(`/api/recovery/profile/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+      
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recoveryProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/recovery/profile"] });
     },
-    onError: (error: Error) => handleMutationError(error, "update profile"),
   });
 }
 
-// --- Hooks for Check-Ins ---
 export function useRecoveryCheckIns(profileId?: number) {
-  return useQuery<CheckIn[]>({
-    queryKey: ["recoveryCheckIns", profileId],
-    queryFn: async ({ queryKey }) => {
-      const [, pid] = queryKey;
-      if (!pid) return [];
-      const res = await apiRequest(`/api/recovery/check-ins?profileId=${pid}`, "GET");
-      return res.json();
-    },
+  return useQuery({
+    queryKey: [`/api/recovery/check-ins/${profileId}`],
+    queryFn: getQueryFn<RecoveryCheckIn[]>({ on401: "returnNull" }),
     enabled: !!profileId,
   });
 }
@@ -101,71 +105,99 @@ export function useRecoveryCheckIns(profileId?: number) {
 export function useCreateCheckIn() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<CheckIn, 'id'>) => {
-      const res = await apiRequest("/api/recovery/check-ins", "POST", data);
+    mutationFn: async ({ profileId, ...data }: Partial<RecoveryCheckIn> & { profileId: number }) => {
+      const res = await fetch(`/api/recovery/check-ins/${profileId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create check-in");
+      }
+      
       return res.json();
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["recoveryCheckIns", data.profileId] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/recovery/check-ins/${variables.profileId}`] });
     },
-    onError: (error: Error) => handleMutationError(error, "create check-in"),
   });
 }
 
-// ====================================================================
-// --- Hooks for Coping Strategies (هذا هو الجزء الذي كان ناقصًا) ---
-// ====================================================================
 export function useCopingStrategies(profileId?: number) {
-    return useQuery<CopingStrategy[]>({
-        queryKey: ["copingStrategies", profileId],
-        queryFn: async ({ queryKey }) => {
-            const [, pid] = queryKey;
-            if (!pid) return [];
-            const res = await apiRequest(`/api/recovery/strategies?profileId=${pid}`, "GET");
-            return res.json();
-        },
-        enabled: !!profileId,
-    });
+  return useQuery({
+    queryKey: [`/api/recovery/coping-strategies/${profileId}`],
+    queryFn: getQueryFn<CopingStrategy[]>({ on401: "returnNull" }),
+    enabled: !!profileId,
+  });
 }
 
 export function useCreateCopingStrategy() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async (data: Omit<CopingStrategy, 'id' | 'timesUsed' | 'effectiveness'> & { effectiveness?: number }) => {
-            const res = await apiRequest("/api/recovery/strategies", "POST", data);
-            return res.json();
-        },
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["copingStrategies", data.profileId] });
-        },
-        onError: (error: Error) => handleMutationError(error, "create coping strategy"),
-    });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ profileId, ...data }: Partial<CopingStrategy> & { profileId: number }) => {
+      const res = await fetch(`/api/recovery/coping-strategies/${profileId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create strategy");
+      }
+      
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/recovery/coping-strategies/${variables.profileId}`] });
+    },
+  });
 }
 
 export function useUpdateCopingStrategy() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async (data: Partial<CopingStrategy> & { id: number; profileId: number }) => {
-            const res = await apiRequest(`/api/recovery/strategies/${data.id}`, "PATCH", data);
-            return res.json();
-        },
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["copingStrategies", data.profileId] });
-        },
-        onError: (error: Error) => handleMutationError(error, "update coping strategy"),
-    });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, profileId, ...data }: Partial<CopingStrategy> & { id: number; profileId: number }) => {
+      const res = await fetch(`/api/recovery/coping-strategies/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update strategy");
+      }
+      
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/recovery/coping-strategies/${variables.profileId}`] });
+    },
+  });
 }
 
 export function useDeleteCopingStrategy() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async ({ id, profileId }: { id: number; profileId: number }) => {
-            await apiRequest(`/api/recovery/strategies/${id}`, "DELETE");
-            return { profileId };
-        },
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["copingStrategies", data.profileId] });
-        },
-        onError: (error: Error) => handleMutationError(error, "delete coping strategy"),
-    });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, profileId }: { id: number; profileId: number }) => {
+      const res = await fetch(`/api/recovery/coping-strategies/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to delete strategy");
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/recovery/coping-strategies/${variables.profileId}`] });
+    },
+  });
 }

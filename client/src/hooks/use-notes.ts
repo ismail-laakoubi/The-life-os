@@ -26,23 +26,24 @@ export function useCreateNote() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<Note>) => {
-      const res = await apiRequest("/api/notes", "POST", data);
+      // FIX: الترتيب الصحيح هو (url, method, data)
+      const res = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
       if (!res.ok) {
-        // إذا كانت الاستجابة غير ناجحة (مثل خطأ 400 أو 500)
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || "Failed to create note");
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create note");
       }
+      
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
     },
-    // --- أضفنا هذا الجزء ---
-    onError: (error) => {
-      console.error("Error creating note:", error);
-      alert(`Failed to create note: ${error.message}`);
-    },
-    // ----------------------
   });
 }
 
@@ -50,22 +51,23 @@ export function useUpdateNote() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<Note> & { id: number }) => {
-      const res = await apiRequest(`/api/notes/${id}`, "PATCH", data);
+      const res = await fetch(`/api/notes/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || "Failed to update note");
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update note");
       }
+      
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
     },
-    // --- أضفنا هذا الجزء ---
-    onError: (error) => {
-      console.error("Error updating note:", error);
-      alert(`Failed to update note: ${error.message}`);
-    },
-    // ----------------------
   });
 }
 
@@ -73,19 +75,18 @@ export function useDeleteNote() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest(`/api/notes/${id}`, "DELETE");
-       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || "Failed to delete note");
+      const res = await fetch(`/api/notes/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to delete note");
       }
-      // لا يوجد .json() في طلبات DELETE عادةً
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
-    },
-    onError: (error) => {
-      console.error("Error deleting note:", error);
-      alert(`Failed to delete note: ${error.message}`);
     },
   });
 }
