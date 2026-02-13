@@ -7,6 +7,8 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { useUser } from "./hooks/use-auth";
 import { LayoutShell } from "./components/layout-shell";
 import { Loader2 } from "lucide-react";
+import BrainPage from "./pages/brain-page";
+import RecoveryPage from "./pages/recovery-page";
 
 // Pages
 import NotFound from "./pages/not-found";
@@ -60,6 +62,10 @@ function Router() {
       <Route path="/finance"><ProtectedRoute component={FinancePage} /></Route>
       <Route path="/reading"><ProtectedRoute component={ReadingPage} /></Route>
       <Route path="/timeline"><ProtectedRoute component={TimelinePage} /></Route>
+      <Route path="/recovery"><ProtectedRoute component={RecoveryPage} /></Route>
+
+      <Route path="/brain"><ProtectedRoute component={BrainPage} /></Route>
+
       <Route path="/break-loop"><ProtectedRoute component={BreakLoopPage} /></Route>
       <Route component={NotFound} />
     </Switch>

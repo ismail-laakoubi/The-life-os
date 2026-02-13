@@ -162,6 +162,22 @@ export const usersRelations = relations(users, ({ many }) => ({
   habitReductions: many(habitReduction),
 }));
 
+// ===== SECOND BRAIN / NOTES =====
+export const notes = pgTable("notes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  tags: text("tags"), // Comma-separated tags
+  category: text("category"), // 'idea' | 'thought' | 'learning' | 'goal' | 'reflection' | 'misc'
+  isPinned: boolean("is_pinned").notNull().default(false),
+  isFavorite: boolean("is_favorite").notNull().default(false),
+  color: text("color"), // For visual organization
+  linkedNoteIds: text("linked_note_ids"), // Comma-separated IDs of connected notes
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const tasksRelations = relations(tasks, ({ one }) => ({
   user: one(users, { fields: [tasks.userId], references: [users.id] }),
 }));
@@ -211,6 +227,89 @@ export const habitReductionLogsRelations = relations(habitReductionLogs, ({ one 
 export const pomodoroSessionsRelations = relations(pomodoroSessions, ({ one }) => ({
   user: one(users, { fields: [pomodoroSessions.userId], references: [users.id] }),
 }));
+export const notesRelations = relations(notes, ({ one }) => ({
+  user: one(users, { fields: [notes.userId], references: [users.id] }),
+}));
+
+export const recoveryProfiles = pgTable("recovery_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  addictionType: text("addiction_type").notNull(), // substance, behavior, etc.
+  sobrietyStartDate: date("sobriety_start_date").notNull(),
+  motivation: text("motivation"), // Why they want to recover
+  triggers: text("triggers"), // Known triggers (JSON array)
+  supportContacts: text("support_contacts"), // Emergency contacts (JSON array)
+  dailyGoal: text("daily_goal"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const recoveryCheckIns = pgTable("recovery_check_ins", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => recoveryProfiles.id),
+  date: date("date").notNull(),
+  isClean: boolean("is_clean").notNull(),
+  mood: integer("mood").notNull(), // 1-10 scale
+  urgeIntensity: integer("urge_intensity"), // 0-10 scale
+  triggersEncountered: text("triggers_encountered"), // Comma-separated
+  copingStrategiesUsed: text("coping_strategies_used"), // Comma-separated
+  gratitude: text("gratitude"), // What they're grateful for
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const recoveryMilestones = pgTable("recovery_milestones", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => recoveryProfiles.id),
+  days: integer("days").notNull(), // 1, 7, 30, 90, 180, 365, etc.
+  achievedAt: timestamp("achieved_at").notNull(),
+  celebrated: boolean("celebrated").notNull().default(false),
+  note: text("note"),
+});
+
+export const recoveryCopingStrategies = pgTable("recovery_coping_strategies", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => recoveryProfiles.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"), // 'physical', 'mental', 'social', 'spiritual'
+  effectiveness: integer("effectiveness"), // 1-5 rating
+  timesUsed: integer("times_used").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const recoveryJournal = pgTable("recovery_journal", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => recoveryProfiles.id),
+  date: timestamp("date").notNull(),
+  entry: text("entry").notNull(),
+  mood: integer("mood"), // 1-10
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const recoveryProfilesRelations = relations(recoveryProfiles, ({ one, many }) => ({
+  user: one(users, { fields: [recoveryProfiles.userId], references: [users.id] }),
+  checkIns: many(recoveryCheckIns),
+  milestones: many(recoveryMilestones),
+  copingStrategies: many(recoveryCopingStrategies),
+  journal: many(recoveryJournal),
+}));
+
+export const recoveryCheckInsRelations = relations(recoveryCheckIns, ({ one }) => ({
+  profile: one(recoveryProfiles, { fields: [recoveryCheckIns.profileId], references: [recoveryProfiles.id] }),
+}));
+
+export const recoveryMilestonesRelations = relations(recoveryMilestones, ({ one }) => ({
+  profile: one(recoveryProfiles, { fields: [recoveryMilestones.profileId], references: [recoveryProfiles.id] }),
+}));
+
+export const recoveryCopingStrategiesRelations = relations(recoveryCopingStrategies, ({ one }) => ({
+  profile: one(recoveryProfiles, { fields: [recoveryCopingStrategies.profileId], references: [recoveryProfiles.id] }),
+}));
+
+export const recoveryJournalRelations = relations(recoveryJournal, ({ one }) => ({
+  profile: one(recoveryProfiles, { fields: [recoveryJournal.profileId], references: [recoveryProfiles.id] }),
+}));
 // ===== SCHEMAS =====
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true });
@@ -254,3 +353,26 @@ export type InsertHabitReductionLog = z.infer<typeof insertHabitReductionLogSche
 export type PomodoroSession = typeof pomodoroSessions.$inferSelect;
 export const insertPomodoroSessionSchema = createInsertSchema(pomodoroSessions).omit({ id: true, createdAt: true });
 export type InsertPomodoroSession = z.infer<typeof insertPomodoroSessionSchema>;
+
+
+export type Note = typeof notes.$inferSelect;
+export const insertNoteSchema = createInsertSchema(notes).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertNote = z.infer<typeof insertNoteSchema>;
+
+export type RecoveryProfile = typeof recoveryProfiles.$inferSelect;
+export type RecoveryCheckIn = typeof recoveryCheckIns.$inferSelect;
+export type RecoveryMilestone = typeof recoveryMilestones.$inferSelect;
+export type RecoveryCopingStrategy = typeof recoveryCopingStrategies.$inferSelect;
+export type RecoveryJournalEntry = typeof recoveryJournal.$inferSelect;
+
+export const insertRecoveryProfileSchema = createInsertSchema(recoveryProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertRecoveryCheckInSchema = createInsertSchema(recoveryCheckIns).omit({ id: true, createdAt: true });
+export const insertRecoveryMilestoneSchema = createInsertSchema(recoveryMilestones).omit({ id: true });
+export const insertRecoveryCopingStrategySchema = createInsertSchema(recoveryCopingStrategies).omit({ id: true, createdAt: true });
+export const insertRecoveryJournalSchema = createInsertSchema(recoveryJournal).omit({ id: true, createdAt: true });
+
+export type InsertRecoveryProfile = z.infer<typeof insertRecoveryProfileSchema>;
+export type InsertRecoveryCheckIn = z.infer<typeof insertRecoveryCheckInSchema>;
+export type InsertRecoveryMilestone = z.infer<typeof insertRecoveryMilestoneSchema>;
+export type InsertRecoveryCopingStrategy = z.infer<typeof insertRecoveryCopingStrategySchema>;
+export type InsertRecoveryJournalEntry = z.infer<typeof insertRecoveryJournalSchema>;

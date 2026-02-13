@@ -3,6 +3,8 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../hooks/use-theme";
 import { Timer } from "lucide-react";
 
+import { Brain } from "lucide-react";
+import { HeartPulse } from "lucide-react";
 
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
@@ -47,6 +49,9 @@ const navigation = [
   { name: "Reading", href: "/reading", icon: BookOpen },
   { name: "Timeline", href: "/timeline", icon: Clock },
   { name: "Break Loop", href: "/break-loop", icon: XCircle },
+  { name: "Brain", href: "/brain", icon: Brain },
+  { name: "Recovery", href: "/recovery", icon: HeartPulse }, // ADD THIS
+
 ];
 
 export function LayoutShell({ children }: { children: ReactNode }) {
@@ -56,7 +61,6 @@ export function LayoutShell({ children }: { children: ReactNode }) {
   const { data: user } = useUser();
   const { mutate: logout } = useLogout();
   
-
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
@@ -71,7 +75,7 @@ export function LayoutShell({ children }: { children: ReactNode }) {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link key={item.name} href={item.href}>
+              <Link key={item.name} href={item.href} asChild>
                 <a
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
@@ -87,20 +91,21 @@ export function LayoutShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-{/* Theme toggle */}
-<div className="p-4">
-  <button
-    onClick={toggle}
-    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all"
-  >
-    {theme === "dark" ? (
-      <Sun className="h-5 w-5" />
-    ) : (
-      <Moon className="h-5 w-5" />
-    )}
-    {theme === "dark" ? "Light mode" : "Dark mode"}
-  </button>
-</div>
+        
+        {/* Theme toggle */}
+        <div className="p-4">
+          <button
+            onClick={toggle}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+            {theme === "dark" ? "Light mode" : "Dark mode"}
+          </button>
+        </div>
 
         <div className="p-4 border-t border-sidebar-border">
           <DropdownMenu>
@@ -122,8 +127,6 @@ export function LayoutShell({ children }: { children: ReactNode }) {
               <DropdownMenuItem>
                 <UserIcon className="mr-2 h-4 w-4" />
                 Profile
-               
-
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => logout()}>

@@ -373,5 +373,161 @@ app.patch("/api/pomodoro/:id", async (req, res, next) => {
     next(error);
   }
 });
+// ========== SECOND BRAIN / NOTES ==========
+app.get("/api/notes", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const notes = await storage.getNotes(req.user!.id);
+  res.json(notes);
+});
+
+app.post("/api/notes", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const note = await storage.createNote(req.user!.id, req.body);
+    res.status(201).json(note);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/notes/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const note = await storage.updateNote(Number(req.params.id), req.body);
+    res.json(note);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/notes/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    await storage.deleteNote(Number(req.params.id));
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
+// ========== RECOVERY ==========
+app.get("/api/recovery/profile", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const profile = await storage.getRecoveryProfile(req.user!.id);
+  res.json(profile || null);
+});
+
+app.post("/api/recovery/profile", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const profile = await storage.createRecoveryProfile(req.user!.id, req.body);
+    res.status(201).json(profile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/recovery/profile/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const profile = await storage.updateRecoveryProfile(Number(req.params.id), req.body);
+    res.json(profile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/recovery/check-ins/:profileId", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const checkIns = await storage.getRecoveryCheckIns(Number(req.params.profileId));
+  res.json(checkIns);
+});
+
+app.post("/api/recovery/check-ins/:profileId", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const checkIn = await storage.createRecoveryCheckIn(Number(req.params.profileId), req.body);
+    res.status(201).json(checkIn);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/recovery/milestones/:profileId", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const milestones = await storage.getRecoveryMilestones(Number(req.params.profileId));
+  res.json(milestones);
+});
+
+app.post("/api/recovery/milestones/:profileId", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const milestone = await storage.createRecoveryMilestone(Number(req.params.profileId), req.body);
+    res.status(201).json(milestone);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/recovery/milestones/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const milestone = await storage.updateRecoveryMilestone(Number(req.params.id), req.body);
+    res.json(milestone);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/recovery/coping-strategies/:profileId", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const strategies = await storage.getCopingStrategies(Number(req.params.profileId));
+  res.json(strategies);
+});
+
+app.post("/api/recovery/coping-strategies/:profileId", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const strategy = await storage.createCopingStrategy(Number(req.params.profileId), req.body);
+    res.status(201).json(strategy);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/recovery/coping-strategies/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const strategy = await storage.updateCopingStrategy(Number(req.params.id), req.body);
+    res.json(strategy);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/recovery/coping-strategies/:id", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    await storage.deleteCopingStrategy(Number(req.params.id));
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/recovery/journal/:profileId", async (req, res) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  const entries = await storage.getRecoveryJournalEntries(Number(req.params.profileId));
+  res.json(entries);
+});
+
+app.post("/api/recovery/journal/:profileId", async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.sendStatus(401);
+  try {
+    const entry = await storage.createRecoveryJournalEntry(Number(req.params.profileId), req.body);
+    res.status(201).json(entry);
+  } catch (error) {
+    next(error);
+  }
+});
   return httpServer;
 }
