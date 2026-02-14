@@ -6,7 +6,7 @@ import { Timer } from "lucide-react";
 import { Brain } from "lucide-react";
 import { HeartPulse } from "lucide-react";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useLogout, useUser } from "../hooks/use-auth";
 import { Button } from "../components/ui/button";
@@ -57,16 +57,38 @@ const navigation = [
 export function LayoutShell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { theme, toggle } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { data: user } = useUser();
   const { mutate: logout } = useLogout();
   
   return (
     <div className="min-h-screen bg-background">
+      {/* Mobile Menu Button */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-sidebar border-b border-sidebar-border p-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-sidebar-foreground">Lifqora</h1>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 hover:bg-sidebar-accent rounded-lg"
+        >
+          {sidebarOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
-        <div className="p-6 border-b border-sidebar-border">
-          <h1 className="text-2xl font-bold text-sidebar-foreground">Life OS</h1>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 md:translate-x-0 ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } md:pt-0 pt-16`}>
+        <div className="p-6 border-b border-sidebar-border hidden md:block">
+          <h1 className="text-2xl font-bold text-sidebar-foreground">Lifqora</h1>
           <p className="text-xs text-sidebar-foreground/60 mt-1">Your personal operating system</p>
         </div>
 
@@ -139,8 +161,8 @@ export function LayoutShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <div className="pl-64">
-        <main className="p-8 max-w-7xl mx-auto">
+      <div className="md:pl-64 pt-16 md:pt-0">
+        <main className="p-4 md:p-8 max-w-7xl mx-auto">
           {children}
         </main>
       </div>
