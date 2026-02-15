@@ -52,7 +52,7 @@ const CATEGORIES = [
   { value: 'idea', label: 'Idea', icon: Lightbulb, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
   { value: 'thought', label: 'Thought', icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10' },
   { value: 'learning', label: 'Learning', icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
-  { value: 'goal', label: 'Goal', icon: Target, color: 'text-gray-800 dark:text-gray-200', bg: 'bg-purple-500/10' },
+  { value: 'goal', label: 'Goal', icon: Target, color: 'text-gray-800 dark:text-gray-200', bg: 'bg-gray-500/10' },
   { value: 'reflection', label: 'Reflection', icon: Sparkles, color: 'text-gray-900 dark:text-gray-100', bg: 'bg-gray-500/10' },
   { value: 'misc', label: 'Misc', icon: Archive, color: 'text-gray-500', bg: 'bg-gray-500/10' },
 ];
@@ -63,8 +63,8 @@ const COLORS = [
   { value: 'yellow', class: 'border-yellow-500 bg-yellow-500/5' },
   { value: 'green', class: 'border-green-500 bg-green-500/5' },
   { value: 'blue', class: 'border-blue-500 bg-blue-500/5' },
-  { value: 'purple', class: 'border-purple-500 bg-purple-500/5' },
-  { value: 'pink', class: 'border-gray-900 dark:border-gray-100 bg-pink-500/5' },
+  { value: 'purple', class: 'border-gray-900 dark:border-gray-100 bg-gray-500/10' },
+  { value: 'pink', class: 'border-gray-900 dark:border-gray-100 bg-gray-500/10' },
 ];
 
 export default function BrainPage() {

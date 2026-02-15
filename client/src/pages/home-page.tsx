@@ -146,7 +146,7 @@ export default function HomePage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -192,14 +192,14 @@ export default function HomePage() {
           className="max-w-5xl mx-auto text-center relative z-10"
         >
           <motion.div variants={itemVariants} className="mb-6">
-            <span className="inline-block px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-black dark:text-white dark:text-purple-400 rounded-full text-sm font-semibold">
+            <span className="inline-block px-4 py-2 bg-gray-500/10 dark:bg-gray-500/10 text-black dark:text-white dark:text-gray-900 dark:text-gray-100 rounded-full text-sm font-semibold">
               ✨ Master Your Life, One Goal at a Time
             </span>
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-6 leading-tight"
+            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight"
           >
             Your Personal Life Operating System
           </motion.h1>
@@ -224,7 +224,7 @@ export default function HomePage() {
             </Button>
             <Button
               variant="outline"
-              className="px-8 py-4 rounded-lg text-lg font-semibold border-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="px-8 py-4 rounded-lg text-lg font-semibold border-2 hover:bg-slate-100 dark:hover:bg-gray-800"
             >
               Explore Features
             </Button>
@@ -242,7 +242,7 @@ export default function HomePage() {
           className="max-w-6xl mx-auto"
         >
           <motion.div variants={itemVariants} className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Everything You Need
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -261,15 +261,15 @@ export default function HomePage() {
                   key={index}
                   variants={featureCardVariants}
                   whileHover="hover"
-                  className="p-8 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer group"
+                  className="p-8 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer group"
                 >
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 10 }}
-                    className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-600/20 flex items-center justify-center mb-6 group-hover:from-purple-500/30 group-hover:to-pink-600/30 transition-all"
+                    className="w-14 h-14 rounded-lg bg-gradient-to-br from-black/20 to-gray-700/20 flex items-center justify-center mb-6 group-hover:from-black/30 group-hover:to-gray-700/30 transition-all"
                   >
-                    <Icon className="w-7 h-7 text-black dark:text-white dark:text-purple-400" />
+                    <Icon className="w-7 h-7 text-black dark:text-white dark:text-gray-900 dark:text-gray-100" />
                   </motion.div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {feature.title}
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -292,7 +292,7 @@ export default function HomePage() {
           className="max-w-6xl mx-auto"
         >
           <motion.div variants={itemVariants} className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Why Choose Life OS?
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -311,15 +311,15 @@ export default function HomePage() {
                   key={index}
                   variants={featureCardVariants}
                   whileHover="hover"
-                  className="p-8 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                  className="p-8 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                 >
                   <motion.div
                     whileHover={{ scale: 1.1 }}
-                    className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-600/20 flex items-center justify-center mb-6"
+                    className="w-16 h-16 rounded-lg bg-gradient-to-br from-black/20 to-gray-700/20 flex items-center justify-center mb-6"
                   >
-                    <Icon className="w-8 h-8 text-black dark:text-white dark:text-purple-400" />
+                    <Icon className="w-8 h-8 text-black dark:text-white dark:text-gray-900 dark:text-gray-100" />
                   </motion.div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {benefit.title}
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -342,7 +342,7 @@ export default function HomePage() {
           className="max-w-6xl mx-auto"
         >
           <motion.div variants={itemVariants} className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Get Started in 4 Steps
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -360,7 +360,7 @@ export default function HomePage() {
                 className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${
                   activeStep === index
                     ? "bg-gradient-to-br from-black to-gray-800 text-white shadow-lg"
-                    : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:border-purple-500"
+                    : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-900 dark:border-gray-100"
                 }`}
               >
                 <div className="text-3xl font-bold mb-3 opacity-70">

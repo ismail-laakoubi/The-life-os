@@ -409,7 +409,7 @@ export default function Dashboard() {
                       </div>
                       <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                          className="h-full bg-gradient-to-r from-black to-gray-700 transition-all duration-500"
                           style={{ width: `${goal.progress}%` }}
                         />
                       </div>
@@ -437,7 +437,7 @@ export default function Dashboard() {
               { icon: Target, label: 'Goals', color: 'text-gray-800 dark:text-gray-200', value: avgGoalProgress },
               { icon: Dumbbell, label: 'Fitness', color: 'text-green-500', value: 0 },
               { icon: Coffee, label: 'Habits', color: 'text-orange-500', value: Math.round((todayHabitsCompleted / (totalHabits || 1)) * 100) },
-              { icon: Book, label: 'Learning', color: 'text-indigo-500', value: 0 },
+              { icon: Book, label: 'Learning', color: 'text-gray-900 dark:text-gray-100', value: 0 },
               { icon: DollarSign, label: 'Finance', color: 'text-emerald-500', value: 0 },
             ].map((category, i) => (
               <div key={i} className="flex flex-col items-center gap-3 p-4 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer">

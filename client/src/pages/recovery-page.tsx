@@ -63,7 +63,7 @@ const MOTIVATIONAL_QUOTES = [
 
 const COPING_CATEGORIES = [
   { value: 'physical', label: 'Physical', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  { value: 'mental', label: 'Mental', icon: Brain, color: 'text-gray-800 dark:text-gray-200', bg: 'bg-purple-500/10' },
+  { value: 'mental', label: 'Mental', icon: Brain, color: 'text-gray-800 dark:text-gray-200', bg: 'bg-gray-500/10' },
   { value: 'social', label: 'Social', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
   { value: 'spiritual', label: 'Spiritual', icon: Sparkles, color: 'text-gray-900 dark:text-gray-100', bg: 'bg-gray-500/10' },
 ];
