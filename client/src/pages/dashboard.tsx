@@ -126,7 +126,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-black via-gray-900 to-gray-800 p-8 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <h1 className="text-4xl font-bold mb-2">{getGreeting()}</h1>
@@ -195,8 +195,8 @@ export default function Dashboard() {
         <Card className="border-border/50 hover:shadow-lg transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <TrendingUp className="h-5 w-5 text-purple-500" />
-              <Star className="h-4 w-4 text-purple-500" />
+              <TrendingUp className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+              <Star className="h-4 w-4 text-gray-800 dark:text-gray-200" />
             </div>
             <div className="text-2xl font-bold mb-1">{totalHabits}</div>
             <div className="text-xs text-muted-foreground">Daily Habits</div>
@@ -285,7 +285,7 @@ export default function Dashboard() {
         <Card className="border-border/50 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-purple-500" />
+              <Activity className="h-5 w-5 text-gray-800 dark:text-gray-200" />
               This Week's Habits
             </CardTitle>
           </CardHeader>
@@ -434,7 +434,7 @@ export default function Dashboard() {
             {[
               { icon: Brain, label: 'Productivity', color: 'text-blue-500', value: Math.round((completedTasks / (totalTasks || 1)) * 100) },
               { icon: Heart, label: 'Wellness', color: 'text-red-500', value: Math.round((todayHabitsCompleted / (totalHabits || 1)) * 100) },
-              { icon: Target, label: 'Goals', color: 'text-purple-500', value: avgGoalProgress },
+              { icon: Target, label: 'Goals', color: 'text-gray-800 dark:text-gray-200', value: avgGoalProgress },
               { icon: Dumbbell, label: 'Fitness', color: 'text-green-500', value: 0 },
               { icon: Coffee, label: 'Habits', color: 'text-orange-500', value: Math.round((todayHabitsCompleted / (totalHabits || 1)) * 100) },
               { icon: Book, label: 'Learning', color: 'text-indigo-500', value: 0 },

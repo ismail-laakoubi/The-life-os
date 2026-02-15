@@ -9,7 +9,7 @@ type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 const TIMER_SETTINGS = {
   work: { minutes: 25, label: 'Focus Time', icon: Brain, color: 'text-blue-500' },
   shortBreak: { minutes: 5, label: 'Short Break', icon: Coffee, color: 'text-green-500' },
-  longBreak: { minutes: 15, label: 'Long Break', icon: Coffee, color: 'text-purple-500' },
+  longBreak: { minutes: 15, label: 'Long Break', icon: Coffee, color: 'text-gray-800 dark:text-gray-200' },
 };
 
 export default function PomodoroPage() {

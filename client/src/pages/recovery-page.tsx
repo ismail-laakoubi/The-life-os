@@ -63,9 +63,9 @@ const MOTIVATIONAL_QUOTES = [
 
 const COPING_CATEGORIES = [
   { value: 'physical', label: 'Physical', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  { value: 'mental', label: 'Mental', icon: Brain, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  { value: 'mental', label: 'Mental', icon: Brain, color: 'text-gray-800 dark:text-gray-200', bg: 'bg-purple-500/10' },
   { value: 'social', label: 'Social', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { value: 'spiritual', label: 'Spiritual', icon: Sparkles, color: 'text-pink-500', bg: 'bg-pink-500/10' },
+  { value: 'spiritual', label: 'Spiritual', icon: Sparkles, color: 'text-gray-900 dark:text-gray-100', bg: 'bg-gray-500/10' },
 ];
 
 export default function RecoveryPage() {
@@ -234,7 +234,7 @@ export default function RecoveryPage() {
   if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Heart className="h-8 w-8 animate-pulse text-pink-500" />
+        <Heart className="h-8 w-8 animate-pulse text-gray-900 dark:text-gray-100" />
       </div>
     );
   }
@@ -246,7 +246,7 @@ export default function RecoveryPage() {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Heart className="h-6 w-6 text-pink-500" />
+              <Heart className="h-6 w-6 text-gray-900 dark:text-gray-100" />
               Welcome to Your Recovery Journey
             </DialogTitle>
           </DialogHeader>
@@ -297,7 +297,7 @@ export default function RecoveryPage() {
       </Dialog>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 p-8 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-800 via-gray-900 to-black p-8 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">

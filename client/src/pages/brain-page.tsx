@@ -52,8 +52,8 @@ const CATEGORIES = [
   { value: 'idea', label: 'Idea', icon: Lightbulb, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
   { value: 'thought', label: 'Thought', icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10' },
   { value: 'learning', label: 'Learning', icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
-  { value: 'goal', label: 'Goal', icon: Target, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  { value: 'reflection', label: 'Reflection', icon: Sparkles, color: 'text-pink-500', bg: 'bg-pink-500/10' },
+  { value: 'goal', label: 'Goal', icon: Target, color: 'text-gray-800 dark:text-gray-200', bg: 'bg-purple-500/10' },
+  { value: 'reflection', label: 'Reflection', icon: Sparkles, color: 'text-gray-900 dark:text-gray-100', bg: 'bg-gray-500/10' },
   { value: 'misc', label: 'Misc', icon: Archive, color: 'text-gray-500', bg: 'bg-gray-500/10' },
 ];
 
@@ -64,7 +64,7 @@ const COLORS = [
   { value: 'green', class: 'border-green-500 bg-green-500/5' },
   { value: 'blue', class: 'border-blue-500 bg-blue-500/5' },
   { value: 'purple', class: 'border-purple-500 bg-purple-500/5' },
-  { value: 'pink', class: 'border-pink-500 bg-pink-500/5' },
+  { value: 'pink', class: 'border-gray-900 dark:border-gray-100 bg-pink-500/5' },
 ];
 
 export default function BrainPage() {
@@ -170,7 +170,7 @@ export default function BrainPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-black via-gray-900 to-gray-800 p-8 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">

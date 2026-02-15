@@ -150,14 +150,14 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-black to-gray-800 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Lifqora</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Lifqora</h1>
           </div>
           <Button
             onClick={handleGetStarted}
-            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300"
+            className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-black text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300"
           >
             Get Started
           </Button>
@@ -173,7 +173,7 @@ export default function HomePage() {
               opacity: [0.3, 0.5, 0.3],
             }}
             transition={{ duration: 8, repeat: Infinity }}
-            className="absolute top-20 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+            className="absolute top-20 right-10 w-72 h-72 bg-gray-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
           />
           <motion.div
             animate={{
@@ -181,7 +181,7 @@ export default function HomePage() {
               opacity: [0.3, 0.5, 0.3],
             }}
             transition={{ duration: 8, repeat: Infinity, delay: 2 }}
-            className="absolute bottom-20 left-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+            className="absolute bottom-20 left-10 w-72 h-72 bg-gray-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
           />
         </div>
 
@@ -192,7 +192,7 @@ export default function HomePage() {
           className="max-w-5xl mx-auto text-center relative z-10"
         >
           <motion.div variants={itemVariants} className="mb-6">
-            <span className="inline-block px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-sm font-semibold">
+            <span className="inline-block px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-black dark:text-white dark:text-purple-400 rounded-full text-sm font-semibold">
               ✨ Master Your Life, One Goal at a Time
             </span>
           </motion.div>
@@ -217,7 +217,7 @@ export default function HomePage() {
           >
             <Button
               onClick={handleGetStarted}
-              className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold px-8 py-4 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+              className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-black text-white font-bold px-8 py-4 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
             >
               Start Free Today
               <ArrowRight className="w-5 h-5" />
@@ -267,7 +267,7 @@ export default function HomePage() {
                     whileHover={{ scale: 1.1, rotate: 10 }}
                     className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-600/20 flex items-center justify-center mb-6 group-hover:from-purple-500/30 group-hover:to-pink-600/30 transition-all"
                   >
-                    <Icon className="w-7 h-7 text-purple-600 dark:text-purple-400" />
+                    <Icon className="w-7 h-7 text-black dark:text-white dark:text-purple-400" />
                   </motion.div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                     {feature.title}
@@ -317,7 +317,7 @@ export default function HomePage() {
                     whileHover={{ scale: 1.1 }}
                     className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-600/20 flex items-center justify-center mb-6"
                   >
-                    <Icon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                    <Icon className="w-8 h-8 text-black dark:text-white dark:text-purple-400" />
                   </motion.div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                     {benefit.title}
@@ -359,7 +359,7 @@ export default function HomePage() {
                 onClick={() => setActiveStep(index)}
                 className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${
                   activeStep === index
-                    ? "bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg"
+                    ? "bg-gradient-to-br from-black to-gray-800 text-white shadow-lg"
                     : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:border-purple-500"
                 }`}
               >
@@ -383,7 +383,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-black via-gray-900 to-gray-800 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <motion.div
             animate={{ rotate: 360 }}
@@ -419,7 +419,7 @@ export default function HomePage() {
           <motion.div variants={itemVariants}>
             <Button
               onClick={handleGetStarted}
-              className="bg-white text-purple-600 hover:bg-slate-100 font-bold px-10 py-4 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 mx-auto"
+              className="bg-white text-black dark:text-white hover:bg-slate-100 font-bold px-10 py-4 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 mx-auto"
             >
               Start Free Today
               <Rocket className="w-5 h-5" />
@@ -439,7 +439,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-6 h-6 text-purple-500" />
+                <Zap className="w-6 h-6 text-gray-800 dark:text-gray-200" />
                 <span className="font-bold text-white">Life OS</span>
               </div>
               <p className="text-sm">Your personal life operating system</p>
