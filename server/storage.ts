@@ -20,6 +20,10 @@ import {
   recoveryCopingStrategies,
   recoveryJournal,
 
+  // ✅ NEW (Reading sessions + notes)
+  readingSessions,
+  readingNotes,
+
   type User,
   type Task,
   type Habit,
@@ -32,8 +36,14 @@ import {
   type HabitReduction,
   type HabitReductionLog,
   type ReadingItem,
+  type PomodoroSession,
+  type Note,
 
-  // ✅ أنواع الإدخال (Insert) لحل أخطاء TypeScript مع Drizzle insert()
+  // ✅ NEW types
+  type ReadingSession,
+  type ReadingNote,
+
+  // ✅ Insert types
   type InsertTask,
   type InsertHabit,
   type InsertGoal,
@@ -51,8 +61,12 @@ import {
   type InsertRecoveryMilestone,
   type InsertRecoveryCopingStrategy,
   type InsertRecoveryJournalEntry,
+
+  // ✅ NEW Insert types
+  type InsertReadingSession,
+  type InsertReadingNote,
 } from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
 
 // ===== USERS =====
 export async function createUser(data: {
@@ -86,7 +100,6 @@ export async function getTasks(userId: number): Promise<Task[]> {
   return db.select().from(tasks).where(eq(tasks.userId, userId)).orderBy(desc(tasks.createdAt));
 }
 
-// ✅ بدل Partial<Task> -> InsertTask بدون userId (لأننا نضيفه هنا)
 export async function createTask(userId: number, data: Omit<InsertTask, "userId">): Promise<Task> {
   const [task] = await db.insert(tasks).values({ ...data, userId }).returning();
   return task;
@@ -115,7 +128,6 @@ export async function getHabits(userId: number): Promise<(Habit & { logs: HabitL
   return habitsWithLogs;
 }
 
-// ✅ بدل Partial<Habit> -> InsertHabit بدون userId
 export async function createHabit(userId: number, data: Omit<InsertHabit, "userId">): Promise<Habit> {
   const [habit] = await db.insert(habits).values({ ...data, userId }).returning();
   return habit;
@@ -150,7 +162,6 @@ export async function getGoals(userId: number): Promise<Goal[]> {
   return db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
 }
 
-// ✅ بدل Partial<Goal> -> InsertGoal بدون userId
 export async function createGoal(userId: number, data: Omit<InsertGoal, "userId">): Promise<Goal> {
   const [goal] = await db.insert(goals).values({ ...data, userId }).returning();
   return goal;
@@ -174,11 +185,7 @@ export async function getFinanceEntries(userId: number): Promise<FinanceEntry[]>
     .orderBy(desc(financeEntries.date));
 }
 
-// ✅ بدل Partial<FinanceEntry> -> InsertFinanceEntry بدون userId
-export async function createFinanceEntry(
-  userId: number,
-  data: Omit<InsertFinanceEntry, "userId">
-): Promise<FinanceEntry> {
+export async function createFinanceEntry(userId: number, data: Omit<InsertFinanceEntry, "userId">): Promise<FinanceEntry> {
   const [entry] = await db.insert(financeEntries).values({ ...data, userId }).returning();
   return entry;
 }
@@ -189,18 +196,10 @@ export async function deleteFinanceEntry(id: number): Promise<void> {
 
 // ===== WELLNESS =====
 export async function getWellnessLogs(userId: number): Promise<WellnessLog[]> {
-  return db
-    .select()
-    .from(wellnessLogs)
-    .where(eq(wellnessLogs.userId, userId))
-    .orderBy(desc(wellnessLogs.date));
+  return db.select().from(wellnessLogs).where(eq(wellnessLogs.userId, userId)).orderBy(desc(wellnessLogs.date));
 }
 
-// ✅ بدل Partial<WellnessLog> -> InsertWellnessLog بدون userId
-export async function createWellnessLog(
-  userId: number,
-  data: Omit<InsertWellnessLog, "userId">
-): Promise<WellnessLog> {
+export async function createWellnessLog(userId: number, data: Omit<InsertWellnessLog, "userId">): Promise<WellnessLog> {
   const [log] = await db.insert(wellnessLogs).values({ ...data, userId }).returning();
   return log;
 }
@@ -212,18 +211,10 @@ export async function updateWellnessLog(id: number, data: Partial<WellnessLog>):
 
 // ===== NUTRITION =====
 export async function getNutritionLogs(userId: number): Promise<NutritionLog[]> {
-  return db
-    .select()
-    .from(nutritionLogs)
-    .where(eq(nutritionLogs.userId, userId))
-    .orderBy(desc(nutritionLogs.date));
+  return db.select().from(nutritionLogs).where(eq(nutritionLogs.userId, userId)).orderBy(desc(nutritionLogs.date));
 }
 
-// ✅ بدل Partial<NutritionLog> -> InsertNutritionLog بدون userId
-export async function createNutritionLog(
-  userId: number,
-  data: Omit<InsertNutritionLog, "userId">
-): Promise<NutritionLog> {
+export async function createNutritionLog(userId: number, data: Omit<InsertNutritionLog, "userId">): Promise<NutritionLog> {
   const [log] = await db.insert(nutritionLogs).values({ ...data, userId }).returning();
   return log;
 }
@@ -234,18 +225,10 @@ export async function deleteNutritionLog(id: number): Promise<void> {
 
 // ===== READING LIST =====
 export async function getReadingList(userId: number): Promise<ReadingItem[]> {
-  return db
-    .select()
-    .from(readingList)
-    .where(eq(readingList.userId, userId))
-    .orderBy(desc(readingList.createdAt));
+  return db.select().from(readingList).where(eq(readingList.userId, userId)).orderBy(desc(readingList.createdAt));
 }
 
-// ✅ بدل Partial<ReadingItem> -> InsertReadingItem بدون userId
-export async function createReadingItem(
-  userId: number,
-  data: Omit<InsertReadingItem, "userId">
-): Promise<ReadingItem> {
+export async function createReadingItem(userId: number, data: Omit<InsertReadingItem, "userId">): Promise<ReadingItem> {
   const [item] = await db.insert(readingList).values({ ...data, userId }).returning();
   return item;
 }
@@ -259,28 +242,136 @@ export async function deleteReadingItem(id: number): Promise<void> {
   await db.delete(readingList).where(eq(readingList.id, id));
 }
 
-// ===== TIMELINE =====
-export async function getTimelineEvents(userId: number): Promise<TimelineEvent[]> {
+/**
+ * ✅ NEW: Reading Sessions
+ */
+export async function getReadingSessions(userId: number, readingItemId?: number): Promise<ReadingSession[]> {
+  if (readingItemId) {
+    return db
+      .select()
+      .from(readingSessions)
+      .where(and(eq(readingSessions.userId, userId), eq(readingSessions.readingItemId, readingItemId)))
+      .orderBy(desc(readingSessions.createdAt));
+  }
   return db
     .select()
-    .from(timelineEvents)
-    .where(eq(timelineEvents.userId, userId))
-    .orderBy(desc(timelineEvents.dateTime));
+    .from(readingSessions)
+    .where(eq(readingSessions.userId, userId))
+    .orderBy(desc(readingSessions.createdAt));
 }
 
-// ✅ بدل Partial<TimelineEvent> -> InsertTimelineEvent بدون userId
-export async function createTimelineEvent(
+export async function createReadingSession(
   userId: number,
-  data: Omit<InsertTimelineEvent, "userId">
-): Promise<TimelineEvent> {
+  data: Omit<InsertReadingSession, "userId">
+): Promise<ReadingSession> {
+  const [session] = await db.insert(readingSessions).values({ ...data, userId }).returning();
+
+  // ✨ Bonus: إذا كان item planned نخليه in-progress أوتوماتيكياً
+  await db
+    .update(readingList)
+    .set({
+      status: sql`CASE WHEN ${readingList.status} = 'planned' THEN 'in-progress' ELSE ${readingList.status} END`,
+    })
+    .where(eq(readingList.id, data.readingItemId));
+
+  return session;
+}
+
+export async function deleteReadingSession(userId: number, id: number): Promise<void> {
+  // delete notes attached to session first
+  await db.delete(readingNotes).where(and(eq(readingNotes.sessionId, id), eq(readingNotes.userId, userId)));
+  await db.delete(readingSessions).where(and(eq(readingSessions.id, id), eq(readingSessions.userId, userId)));
+}
+
+/**
+ * ✅ NEW: Reading Notes / Highlights
+ */
+export async function getReadingNotes(userId: number, readingItemId?: number): Promise<ReadingNote[]> {
+  if (readingItemId) {
+    return db
+      .select()
+      .from(readingNotes)
+      .where(and(eq(readingNotes.userId, userId), eq(readingNotes.readingItemId, readingItemId)))
+      .orderBy(desc(readingNotes.createdAt));
+  }
+
+  return db
+    .select()
+    .from(readingNotes)
+    .where(eq(readingNotes.userId, userId))
+    .orderBy(desc(readingNotes.createdAt));
+}
+
+export async function createReadingNote(
+  userId: number,
+  data: Omit<InsertReadingNote, "userId">
+): Promise<ReadingNote> {
+  const [note] = await db.insert(readingNotes).values({ ...data, userId }).returning();
+  return note;
+}
+
+export async function deleteReadingNote(userId: number, id: number): Promise<void> {
+  await db.delete(readingNotes).where(and(eq(readingNotes.id, id), eq(readingNotes.userId, userId)));
+}
+
+/**
+ * ✅ NEW: Weekly stats + streak
+ * start/end: YYYY-MM-DD (date)
+ */
+export async function getReadingWeeklyStats(userId: number, start: string, end: string) {
+  const [agg] = await db
+    .select({
+      minutes: sql<number>`COALESCE(SUM(${readingSessions.durationMinutes}), 0)`,
+      pages: sql<number>`COALESCE(SUM(${readingSessions.pagesRead}), 0)`,
+      sessions: sql<number>`COUNT(*)`,
+    })
+    .from(readingSessions)
+    .where(and(eq(readingSessions.userId, userId), gte(readingSessions.sessionDate, start), lte(readingSessions.sessionDate, end)));
+
+  // streak days: list unique dates DESC
+  const days = await db
+    .select({ d: readingSessions.sessionDate })
+    .from(readingSessions)
+    .where(eq(readingSessions.userId, userId))
+    .groupBy(readingSessions.sessionDate)
+    .orderBy(desc(readingSessions.sessionDate));
+
+  const streakDays = calcStreakDays(days.map((x) => x.d as unknown as string));
+
+  return { ...agg, streakDays };
+}
+
+function calcStreakDays(datesDesc: string[]) {
+  if (!datesDesc || datesDesc.length === 0) return 0;
+
+  const toDay = (s: string) => {
+    // date column => usually comes as string "YYYY-MM-DD"
+    const t = new Date(`${s}T00:00:00Z`).getTime();
+    return Math.floor(t / (1000 * 60 * 60 * 24));
+  };
+
+  let streak = 1;
+  for (let i = 0; i < datesDesc.length - 1; i++) {
+    const a = toDay(datesDesc[i]);
+    const b = toDay(datesDesc[i + 1]);
+    if (a - b === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ===== TIMELINE =====
+export async function getTimelineEvents(userId: number): Promise<TimelineEvent[]> {
+  return db.select().from(timelineEvents).where(eq(timelineEvents.userId, userId)).orderBy(desc(timelineEvents.dateTime));
+}
+
+export async function createTimelineEvent(userId: number, data: Omit<InsertTimelineEvent, "userId">): Promise<TimelineEvent> {
   const [event] = await db.insert(timelineEvents).values({ ...data, userId }).returning();
   return event;
 }
 
 // ===== HABIT REDUCTION =====
-export async function getHabitReductions(
-  userId: number
-): Promise<(HabitReduction & { logs: HabitReductionLog[] })[]> {
+export async function getHabitReductions(userId: number): Promise<(HabitReduction & { logs: HabitReductionLog[] })[]> {
   const reductions = await db.select().from(habitReduction).where(eq(habitReduction.userId, userId));
 
   const reductionsWithLogs = await Promise.all(
@@ -293,20 +384,12 @@ export async function getHabitReductions(
   return reductionsWithLogs;
 }
 
-// ✅ بدل Partial<HabitReduction> -> InsertHabitReduction بدون userId
-export async function createHabitReduction(
-  userId: number,
-  data: Omit<InsertHabitReduction, "userId">
-): Promise<HabitReduction> {
+export async function createHabitReduction(userId: number, data: Omit<InsertHabitReduction, "userId">): Promise<HabitReduction> {
   const [reduction] = await db.insert(habitReduction).values({ ...data, userId }).returning();
   return reduction;
 }
 
-// ✅ بدل Partial<HabitReductionLog> -> InsertHabitReductionLog بدون trackerId
-export async function logHabitReduction(
-  trackerId: number,
-  data: Omit<InsertHabitReductionLog, "trackerId">
-): Promise<HabitReductionLog> {
+export async function logHabitReduction(trackerId: number, data: Omit<InsertHabitReductionLog, "trackerId">): Promise<HabitReductionLog> {
   const [log] = await db.insert(habitReductionLogs).values({ trackerId, ...data }).returning();
   return log;
 }
@@ -317,40 +400,31 @@ export async function deleteHabitReduction(id: number): Promise<void> {
 }
 
 // ===== POMODORO =====
-export async function getPomodoroSessions(userId: number) {
-  return db
-    .select()
-    .from(pomodoroSessions)
-    .where(eq(pomodoroSessions.userId, userId))
-    .orderBy(desc(pomodoroSessions.startedAt));
+export async function getPomodoroSessions(userId: number): Promise<PomodoroSession[]> {
+  return db.select().from(pomodoroSessions).where(eq(pomodoroSessions.userId, userId)).orderBy(desc(pomodoroSessions.startedAt));
 }
 
-// ✅ بدل Partial<$inferInsert> -> InsertPomodoroSession بدون userId
-export async function createPomodoroSession(
-  userId: number,
-  data: Omit<InsertPomodoroSession, "userId">
-) {
+export async function createPomodoroSession(userId: number, data: Omit<InsertPomodoroSession, "userId">): Promise<PomodoroSession> {
   const [session] = await db.insert(pomodoroSessions).values({ ...data, userId }).returning();
   return session;
 }
 
-export async function updatePomodoroSession(id: number, data: Partial<InsertPomodoroSession>) {
+export async function updatePomodoroSession(id: number, data: Partial<InsertPomodoroSession>): Promise<PomodoroSession> {
   const [session] = await db.update(pomodoroSessions).set(data).where(eq(pomodoroSessions.id, id)).returning();
   return session;
 }
 
 // ===== NOTES =====
-export async function getNotes(userId: number) {
+export async function getNotes(userId: number): Promise<Note[]> {
   return db.select().from(notes).where(eq(notes.userId, userId)).orderBy(desc(notes.updatedAt));
 }
 
-// ✅ بدل Partial<$inferInsert> -> InsertNote بدون userId
-export async function createNote(userId: number, data: Omit<InsertNote, "userId">) {
+export async function createNote(userId: number, data: Omit<InsertNote, "userId">): Promise<Note> {
   const [note] = await db.insert(notes).values({ ...data, userId }).returning();
   return note;
 }
 
-export async function updateNote(id: number, data: Partial<InsertNote>) {
+export async function updateNote(id: number, data: Partial<InsertNote>): Promise<Note> {
   const [note] = await db
     .update(notes)
     .set({ ...data, updatedAt: new Date() })
@@ -359,17 +433,13 @@ export async function updateNote(id: number, data: Partial<InsertNote>) {
   return note;
 }
 
-export async function deleteNote(id: number) {
+export async function deleteNote(id: number): Promise<void> {
   await db.delete(notes).where(eq(notes.id, id));
 }
 
-export async function searchNotes(userId: number, query: string) {
-  // (ملاحظة: أنت تركتها بدون شرط بحث، هذا مجرد placeholder)
-  return db
-    .select()
-    .from(notes)
-    .where(and(eq(notes.userId, userId)))
-    .orderBy(desc(notes.updatedAt));
+export async function searchNotes(userId: number, query: string): Promise<Note[]> {
+  // placeholder بسيط (تقدر تطوره بعد)
+  return db.select().from(notes).where(and(eq(notes.userId, userId))).orderBy(desc(notes.updatedAt));
 }
 
 // ===== RECOVERY =====
@@ -378,11 +448,7 @@ export async function getRecoveryProfile(userId: number) {
   return profile;
 }
 
-// ✅ InsertRecoveryProfile بدون userId
-export async function createRecoveryProfile(
-  userId: number,
-  data: Omit<InsertRecoveryProfile, "userId">
-) {
+export async function createRecoveryProfile(userId: number, data: Omit<InsertRecoveryProfile, "userId">) {
   const [profile] = await db.insert(recoveryProfiles).values({ ...data, userId }).returning();
   return profile;
 }
@@ -400,11 +466,7 @@ export async function getRecoveryCheckIns(profileId: number) {
   return db.select().from(recoveryCheckIns).where(eq(recoveryCheckIns.profileId, profileId)).orderBy(desc(recoveryCheckIns.date));
 }
 
-// ✅ InsertRecoveryCheckIn بدون profileId
-export async function createRecoveryCheckIn(
-  profileId: number,
-  data: Omit<InsertRecoveryCheckIn, "profileId">
-) {
+export async function createRecoveryCheckIn(profileId: number, data: Omit<InsertRecoveryCheckIn, "profileId">) {
   const [checkIn] = await db.insert(recoveryCheckIns).values({ ...data, profileId }).returning();
   return checkIn;
 }
@@ -413,11 +475,7 @@ export async function getRecoveryMilestones(profileId: number) {
   return db.select().from(recoveryMilestones).where(eq(recoveryMilestones.profileId, profileId)).orderBy(recoveryMilestones.days);
 }
 
-// ✅ InsertRecoveryMilestone بدون profileId
-export async function createRecoveryMilestone(
-  profileId: number,
-  data: Omit<InsertRecoveryMilestone, "profileId">
-) {
+export async function createRecoveryMilestone(profileId: number, data: Omit<InsertRecoveryMilestone, "profileId">) {
   const [milestone] = await db.insert(recoveryMilestones).values({ ...data, profileId }).returning();
   return milestone;
 }
@@ -435,11 +493,7 @@ export async function getCopingStrategies(profileId: number) {
     .orderBy(desc(recoveryCopingStrategies.effectiveness));
 }
 
-// ✅ InsertRecoveryCopingStrategy بدون profileId
-export async function createCopingStrategy(
-  profileId: number,
-  data: Omit<InsertRecoveryCopingStrategy, "profileId">
-) {
+export async function createCopingStrategy(profileId: number, data: Omit<InsertRecoveryCopingStrategy, "profileId">) {
   const [strategy] = await db.insert(recoveryCopingStrategies).values({ ...data, profileId }).returning();
   return strategy;
 }
@@ -457,11 +511,7 @@ export async function getRecoveryJournalEntries(profileId: number) {
   return db.select().from(recoveryJournal).where(eq(recoveryJournal.profileId, profileId)).orderBy(desc(recoveryJournal.date));
 }
 
-// ✅ InsertRecoveryJournalEntry بدون profileId
-export async function createRecoveryJournalEntry(
-  profileId: number,
-  data: Omit<InsertRecoveryJournalEntry, "profileId">
-) {
+export async function createRecoveryJournalEntry(profileId: number, data: Omit<InsertRecoveryJournalEntry, "profileId">) {
   const [entry] = await db.insert(recoveryJournal).values({ ...data, profileId }).returning();
   return entry;
 }
@@ -512,6 +562,15 @@ export const storage = {
   createReadingItem,
   updateReadingItem,
   deleteReadingItem,
+
+  // ✅ NEW Reading (Sessions + Notes + Stats)
+  getReadingSessions,
+  createReadingSession,
+  deleteReadingSession,
+  getReadingNotes,
+  createReadingNote,
+  deleteReadingNote,
+  getReadingWeeklyStats,
 
   // Timeline
   getTimelineEvents,

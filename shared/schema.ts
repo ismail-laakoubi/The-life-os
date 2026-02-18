@@ -105,6 +105,39 @@ export const readingList = pgTable("reading_list", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+/**
+ * ✅ NEW: READING SESSIONS (لجلسات القراءة: minutes/pages/date)
+ * - كتخدم مع الكتب والمقالات (وحتى أي type فـ readingList)
+ */
+export const readingSessions = pgTable("reading_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  readingItemId: integer("reading_item_id").notNull().references(() => readingList.id),
+
+  sessionDate: date("session_date").notNull(),
+  durationMinutes: integer("duration_minutes").notNull().default(0),
+  pagesRead: integer("pages_read").notNull().default(0),
+
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+/**
+ * ✅ NEW: READING NOTES / HIGHLIGHTS
+ */
+export const readingNotes = pgTable("reading_notes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+
+  readingItemId: integer("reading_item_id").references(() => readingList.id),
+  sessionId: integer("session_id").references(() => readingSessions.id),
+
+  kind: text("kind").notNull().default("note"), // 'note' | 'highlight'
+  content: text("content").notNull(),
+  pageOrTime: text("page_or_time"), // "p.34" أو "12:10"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ===== TIMELINE =====
 export const timelineEvents = pgTable("timeline_events", {
   id: serial("id").primaryKey(),
@@ -160,6 +193,10 @@ export const usersRelations = relations(users, ({ many }) => ({
   readingList: many(readingList),
   timelineEvents: many(timelineEvents),
   habitReductions: many(habitReduction),
+
+  // ✅ NEW
+  readingSessions: many(readingSessions),
+  readingNotes: many(readingNotes),
 }));
 
 // ===== SECOND BRAIN / NOTES =====
@@ -207,8 +244,12 @@ export const nutritionLogsRelations = relations(nutritionLogs, ({ one }) => ({
   user: one(users, { fields: [nutritionLogs.userId], references: [users.id] }),
 }));
 
-export const readingListRelations = relations(readingList, ({ one }) => ({
+export const readingListRelations = relations(readingList, ({ one, many }) => ({
   user: one(users, { fields: [readingList.userId], references: [users.id] }),
+
+  // ✅ NEW
+  sessions: many(readingSessions),
+  readingNotes: many(readingNotes),
 }));
 
 export const timelineEventsRelations = relations(timelineEvents, ({ one }) => ({
@@ -227,10 +268,25 @@ export const habitReductionLogsRelations = relations(habitReductionLogs, ({ one 
 export const pomodoroSessionsRelations = relations(pomodoroSessions, ({ one }) => ({
   user: one(users, { fields: [pomodoroSessions.userId], references: [users.id] }),
 }));
+
 export const notesRelations = relations(notes, ({ one }) => ({
   user: one(users, { fields: [notes.userId], references: [users.id] }),
 }));
 
+// ✅ NEW: relations for reading sessions / notes
+export const readingSessionsRelations = relations(readingSessions, ({ one, many }) => ({
+  user: one(users, { fields: [readingSessions.userId], references: [users.id] }),
+  item: one(readingList, { fields: [readingSessions.readingItemId], references: [readingList.id] }),
+  notes: many(readingNotes),
+}));
+
+export const readingNotesRelations = relations(readingNotes, ({ one }) => ({
+  user: one(users, { fields: [readingNotes.userId], references: [users.id] }),
+  item: one(readingList, { fields: [readingNotes.readingItemId], references: [readingList.id] }),
+  session: one(readingSessions, { fields: [readingNotes.sessionId], references: [readingSessions.id] }),
+}));
+
+// ===== RECOVERY =====
 export const recoveryProfiles = pgTable("recovery_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
@@ -310,6 +366,7 @@ export const recoveryCopingStrategiesRelations = relations(recoveryCopingStrateg
 export const recoveryJournalRelations = relations(recoveryJournal, ({ one }) => ({
   profile: one(recoveryProfiles, { fields: [recoveryJournal.profileId], references: [recoveryProfiles.id] }),
 }));
+
 // ===== SCHEMAS =====
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true });
@@ -323,6 +380,19 @@ export const insertReadingItemSchema = createInsertSchema(readingList).omit({ id
 export const insertTimelineEventSchema = createInsertSchema(timelineEvents).omit({ id: true, createdAt: true });
 export const insertHabitReductionSchema = createInsertSchema(habitReduction).omit({ id: true, createdAt: true });
 export const insertHabitReductionLogSchema = createInsertSchema(habitReductionLogs).omit({ id: true, createdAt: true });
+
+export const insertPomodoroSessionSchema = createInsertSchema(pomodoroSessions).omit({ id: true, createdAt: true });
+export const insertNoteSchema = createInsertSchema(notes).omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertRecoveryProfileSchema = createInsertSchema(recoveryProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertRecoveryCheckInSchema = createInsertSchema(recoveryCheckIns).omit({ id: true, createdAt: true });
+export const insertRecoveryMilestoneSchema = createInsertSchema(recoveryMilestones).omit({ id: true });
+export const insertRecoveryCopingStrategySchema = createInsertSchema(recoveryCopingStrategies).omit({ id: true, createdAt: true });
+export const insertRecoveryJournalSchema = createInsertSchema(recoveryJournal).omit({ id: true, createdAt: true });
+
+// ✅ NEW: Reading schemas
+export const insertReadingSessionSchema = createInsertSchema(readingSessions).omit({ id: true, createdAt: true });
+export const insertReadingNoteSchema = createInsertSchema(readingNotes).omit({ id: true, createdAt: true });
 
 // ===== TYPES =====
 export type User = typeof users.$inferSelect;
@@ -338,6 +408,20 @@ export type TimelineEvent = typeof timelineEvents.$inferSelect;
 export type HabitReduction = typeof habitReduction.$inferSelect;
 export type HabitReductionLog = typeof habitReductionLogs.$inferSelect;
 
+export type PomodoroSession = typeof pomodoroSessions.$inferSelect;
+export type Note = typeof notes.$inferSelect;
+
+export type RecoveryProfile = typeof recoveryProfiles.$inferSelect;
+export type RecoveryCheckIn = typeof recoveryCheckIns.$inferSelect;
+export type RecoveryMilestone = typeof recoveryMilestones.$inferSelect;
+export type RecoveryCopingStrategy = typeof recoveryCopingStrategies.$inferSelect;
+export type RecoveryJournalEntry = typeof recoveryJournal.$inferSelect;
+
+// ✅ NEW: Reading types
+export type ReadingSession = typeof readingSessions.$inferSelect;
+export type ReadingNote = typeof readingNotes.$inferSelect;
+
+// ===== INSERT TYPES =====
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertHabit = z.infer<typeof insertHabitSchema>;
@@ -350,29 +434,16 @@ export type InsertReadingItem = z.infer<typeof insertReadingItemSchema>;
 export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
 export type InsertHabitReduction = z.infer<typeof insertHabitReductionSchema>;
 export type InsertHabitReductionLog = z.infer<typeof insertHabitReductionLogSchema>;
-export type PomodoroSession = typeof pomodoroSessions.$inferSelect;
-export const insertPomodoroSessionSchema = createInsertSchema(pomodoroSessions).omit({ id: true, createdAt: true });
+
 export type InsertPomodoroSession = z.infer<typeof insertPomodoroSessionSchema>;
-
-
-export type Note = typeof notes.$inferSelect;
-export const insertNoteSchema = createInsertSchema(notes).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertNote = z.infer<typeof insertNoteSchema>;
-
-export type RecoveryProfile = typeof recoveryProfiles.$inferSelect;
-export type RecoveryCheckIn = typeof recoveryCheckIns.$inferSelect;
-export type RecoveryMilestone = typeof recoveryMilestones.$inferSelect;
-export type RecoveryCopingStrategy = typeof recoveryCopingStrategies.$inferSelect;
-export type RecoveryJournalEntry = typeof recoveryJournal.$inferSelect;
-
-export const insertRecoveryProfileSchema = createInsertSchema(recoveryProfiles).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertRecoveryCheckInSchema = createInsertSchema(recoveryCheckIns).omit({ id: true, createdAt: true });
-export const insertRecoveryMilestoneSchema = createInsertSchema(recoveryMilestones).omit({ id: true });
-export const insertRecoveryCopingStrategySchema = createInsertSchema(recoveryCopingStrategies).omit({ id: true, createdAt: true });
-export const insertRecoveryJournalSchema = createInsertSchema(recoveryJournal).omit({ id: true, createdAt: true });
 
 export type InsertRecoveryProfile = z.infer<typeof insertRecoveryProfileSchema>;
 export type InsertRecoveryCheckIn = z.infer<typeof insertRecoveryCheckInSchema>;
 export type InsertRecoveryMilestone = z.infer<typeof insertRecoveryMilestoneSchema>;
 export type InsertRecoveryCopingStrategy = z.infer<typeof insertRecoveryCopingStrategySchema>;
 export type InsertRecoveryJournalEntry = z.infer<typeof insertRecoveryJournalSchema>;
+
+// ✅ NEW: Reading insert types
+export type InsertReadingSession = z.infer<typeof insertReadingSessionSchema>;
+export type InsertReadingNote = z.infer<typeof insertReadingNoteSchema>;

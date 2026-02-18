@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
 import { api } from "@shared/routes";
+import { z } from "zod";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -46,7 +47,7 @@ export async function registerRoutes(
         category: "health"
       });
       await storage.logHabit(habit.id, {
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         value: 1
       });
 
@@ -83,9 +84,9 @@ export async function registerRoutes(
   app.patch("/api/tasks/:id", async (req, res, next) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const input = api.tasks.update.input.parse({ 
-        ...req.body, 
-        id: parseInt(req.params.id) 
+      const input = api.tasks.update.input.parse({
+        ...req.body,
+        id: parseInt(req.params.id)
       });
       const { id, ...updates } = input;
       const task = await storage.updateTask(id, updates);
@@ -157,9 +158,9 @@ export async function registerRoutes(
   app.patch("/api/goals/:id", async (req, res, next) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const input = api.goals.update.input.parse({ 
-        ...req.body, 
-        id: parseInt(req.params.id) 
+      const input = api.goals.update.input.parse({
+        ...req.body,
+        id: parseInt(req.params.id)
       });
       const { id, ...updates } = input;
       const goal = await storage.updateGoal(id, updates);
@@ -220,9 +221,9 @@ export async function registerRoutes(
   app.patch("/api/wellness/:id", async (req, res, next) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const input = api.wellness.update.input.parse({ 
-        ...req.body, 
-        id: parseInt(req.params.id) 
+      const input = api.wellness.update.input.parse({
+        ...req.body,
+        id: parseInt(req.params.id)
       });
       const { id, ...updates } = input;
       const log = await storage.updateWellnessLog(id, updates);
@@ -277,9 +278,9 @@ export async function registerRoutes(
   app.patch("/api/reading/:id", async (req, res, next) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const input = api.reading.update.input.parse({ 
-        ...req.body, 
-        id: parseInt(req.params.id) 
+      const input = api.reading.update.input.parse({
+        ...req.body,
+        id: parseInt(req.params.id)
       });
       const { id, ...updates } = input;
       const item = await storage.updateReadingItem(id, updates);
@@ -293,6 +294,111 @@ export async function registerRoutes(
     if (!req.isAuthenticated()) return res.sendStatus(401);
     await storage.deleteReadingItem(Number(req.params.id));
     res.sendStatus(204);
+  });
+
+  // ============================
+  // ✅ NEW: READING SESSIONS
+  // ============================
+  app.get("/api/reading/sessions", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const itemIdRaw = req.query.itemId;
+    const readingItemId = itemIdRaw ? Number(itemIdRaw) : undefined;
+
+    const sessions = await storage.getReadingSessions(req.user!.id, readingItemId);
+    res.json(sessions);
+  });
+
+  app.post("/api/reading/sessions", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const input = z.object({
+        readingItemId: z.number().int(),
+        sessionDate: z.string().min(10).max(10), // YYYY-MM-DD
+        durationMinutes: z.number().int().min(0).default(0),
+        pagesRead: z.number().int().min(0).default(0),
+        note: z.string().optional(),
+      }).parse(req.body);
+
+      const session = await storage.createReadingSession(req.user!.id, input);
+      res.status(201).json(session);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/reading/sessions/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      await storage.deleteReadingSession(req.user!.id, Number(req.params.id));
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ============================
+  // ✅ NEW: READING NOTES
+  // ============================
+  app.get("/api/reading/notes", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const itemIdRaw = req.query.itemId;
+    const readingItemId = itemIdRaw ? Number(itemIdRaw) : undefined;
+
+    const notes = await storage.getReadingNotes(req.user!.id, readingItemId);
+    res.json(notes);
+  });
+
+  app.post("/api/reading/notes", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const input = z.object({
+        readingItemId: z.number().int().optional(),
+        sessionId: z.number().int().optional(),
+        kind: z.enum(["note", "highlight"]).default("note"),
+        content: z.string().min(1),
+        pageOrTime: z.string().optional(),
+      }).parse(req.body);
+
+      const note = await storage.createReadingNote(req.user!.id, input);
+      res.status(201).json(note);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/reading/notes/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      await storage.deleteReadingNote(req.user!.id, Number(req.params.id));
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // ============================
+  // ✅ NEW: WEEKLY STATS + STREAK
+  // ============================
+  app.get("/api/reading/stats/weekly", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const q = z.object({
+        start: z.string().min(10).max(10), // YYYY-MM-DD
+        end: z.string().min(10).max(10),   // YYYY-MM-DD
+      }).parse(req.query);
+
+      const stats = await storage.getReadingWeeklyStats(req.user!.id, q.start, q.end);
+      res.json(stats);
+    } catch (error) {
+      next(error);
+    }
   });
 
   // ========== TIMELINE ==========
@@ -347,187 +453,191 @@ export async function registerRoutes(
     await storage.deleteHabitReduction(Number(req.params.id));
     res.sendStatus(204);
   });
-// ========== POMODORO ==========
-app.get("/api/pomodoro", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const sessions = await storage.getPomodoroSessions(req.user!.id);
-  res.json(sessions);
-});
 
-app.post("/api/pomodoro", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const session = await storage.createPomodoroSession(req.user!.id, req.body);
-    res.status(201).json(session);
-  } catch (error) {
-    next(error);
-  }
-});
+  // ========== POMODORO ==========
+  app.get("/api/pomodoro", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const sessions = await storage.getPomodoroSessions(req.user!.id);
+    res.json(sessions);
+  });
 
-app.patch("/api/pomodoro/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const session = await storage.updatePomodoroSession(Number(req.params.id), req.body);
-    res.json(session);
-  } catch (error) {
-    next(error);
-  }
-});
-// ========== SECOND BRAIN / NOTES ==========
-app.get("/api/notes", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const notes = await storage.getNotes(req.user!.id);
-  res.json(notes);
-});
+  app.post("/api/pomodoro", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const session = await storage.createPomodoroSession(req.user!.id, req.body);
+      res.status(201).json(session);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.post("/api/notes", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const note = await storage.createNote(req.user!.id, req.body);
-    res.status(201).json(note);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.patch("/api/pomodoro/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const session = await storage.updatePomodoroSession(Number(req.params.id), req.body);
+      res.json(session);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.patch("/api/notes/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const note = await storage.updateNote(Number(req.params.id), req.body);
-    res.json(note);
-  } catch (error) {
-    next(error);
-  }
-});
+  // ========== SECOND BRAIN / NOTES ==========
+  app.get("/api/notes", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const notes = await storage.getNotes(req.user!.id);
+    res.json(notes);
+  });
 
-app.delete("/api/notes/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    await storage.deleteNote(Number(req.params.id));
-    res.sendStatus(204);
-  } catch (error) {
-    next(error);
-  }
-});
-// ========== RECOVERY ==========
-app.get("/api/recovery/profile", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const profile = await storage.getRecoveryProfile(req.user!.id);
-  res.json(profile || null);
-});
+  app.post("/api/notes", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const note = await storage.createNote(req.user!.id, req.body);
+      res.status(201).json(note);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.post("/api/recovery/profile", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const profile = await storage.createRecoveryProfile(req.user!.id, req.body);
-    res.status(201).json(profile);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.patch("/api/notes/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const note = await storage.updateNote(Number(req.params.id), req.body);
+      res.json(note);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.patch("/api/recovery/profile/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const profile = await storage.updateRecoveryProfile(Number(req.params.id), req.body);
-    res.json(profile);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.delete("/api/notes/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      await storage.deleteNote(Number(req.params.id));
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.get("/api/recovery/check-ins/:profileId", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const checkIns = await storage.getRecoveryCheckIns(Number(req.params.profileId));
-  res.json(checkIns);
-});
+  // ========== RECOVERY ==========
+  app.get("/api/recovery/profile", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const profile = await storage.getRecoveryProfile(req.user!.id);
+    res.json(profile || null);
+  });
 
-app.post("/api/recovery/check-ins/:profileId", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const checkIn = await storage.createRecoveryCheckIn(Number(req.params.profileId), req.body);
-    res.status(201).json(checkIn);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.post("/api/recovery/profile", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const profile = await storage.createRecoveryProfile(req.user!.id, req.body);
+      res.status(201).json(profile);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.get("/api/recovery/milestones/:profileId", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const milestones = await storage.getRecoveryMilestones(Number(req.params.profileId));
-  res.json(milestones);
-});
+  app.patch("/api/recovery/profile/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const profile = await storage.updateRecoveryProfile(Number(req.params.id), req.body);
+      res.json(profile);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.post("/api/recovery/milestones/:profileId", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const milestone = await storage.createRecoveryMilestone(Number(req.params.profileId), req.body);
-    res.status(201).json(milestone);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.get("/api/recovery/check-ins/:profileId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const checkIns = await storage.getRecoveryCheckIns(Number(req.params.profileId));
+    res.json(checkIns);
+  });
 
-app.patch("/api/recovery/milestones/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const milestone = await storage.updateRecoveryMilestone(Number(req.params.id), req.body);
-    res.json(milestone);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.post("/api/recovery/check-ins/:profileId", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const checkIn = await storage.createRecoveryCheckIn(Number(req.params.profileId), req.body);
+      res.status(201).json(checkIn);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.get("/api/recovery/coping-strategies/:profileId", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const strategies = await storage.getCopingStrategies(Number(req.params.profileId));
-  res.json(strategies);
-});
+  app.get("/api/recovery/milestones/:profileId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const milestones = await storage.getRecoveryMilestones(Number(req.params.profileId));
+    res.json(milestones);
+  });
 
-app.post("/api/recovery/coping-strategies/:profileId", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const strategy = await storage.createCopingStrategy(Number(req.params.profileId), req.body);
-    res.status(201).json(strategy);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.post("/api/recovery/milestones/:profileId", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const milestone = await storage.createRecoveryMilestone(Number(req.params.profileId), req.body);
+      res.status(201).json(milestone);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.patch("/api/recovery/coping-strategies/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const strategy = await storage.updateCopingStrategy(Number(req.params.id), req.body);
-    res.json(strategy);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.patch("/api/recovery/milestones/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const milestone = await storage.updateRecoveryMilestone(Number(req.params.id), req.body);
+      res.json(milestone);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.delete("/api/recovery/coping-strategies/:id", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    await storage.deleteCopingStrategy(Number(req.params.id));
-    res.sendStatus(204);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.get("/api/recovery/coping-strategies/:profileId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const strategies = await storage.getCopingStrategies(Number(req.params.profileId));
+    res.json(strategies);
+  });
 
-app.get("/api/recovery/journal/:profileId", async (req, res) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  const entries = await storage.getRecoveryJournalEntries(Number(req.params.profileId));
-  res.json(entries);
-});
+  app.post("/api/recovery/coping-strategies/:profileId", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const strategy = await storage.createCopingStrategy(Number(req.params.profileId), req.body);
+      res.status(201).json(strategy);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-app.post("/api/recovery/journal/:profileId", async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  try {
-    const entry = await storage.createRecoveryJournalEntry(Number(req.params.profileId), req.body);
-    res.status(201).json(entry);
-  } catch (error) {
-    next(error);
-  }
-});
+  app.patch("/api/recovery/coping-strategies/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const strategy = await storage.updateCopingStrategy(Number(req.params.id), req.body);
+      res.json(strategy);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/recovery/coping-strategies/:id", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      await storage.deleteCopingStrategy(Number(req.params.id));
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/recovery/journal/:profileId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const entries = await storage.getRecoveryJournalEntries(Number(req.params.profileId));
+    res.json(entries);
+  });
+
+  app.post("/api/recovery/journal/:profileId", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const entry = await storage.createRecoveryJournalEntry(Number(req.params.profileId), req.body);
+      res.status(201).json(entry);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   return httpServer;
 }
